@@ -2,11 +2,14 @@ package com.example.demo.CONTROLLERS;
 
 import com.example.demo.DTOs.RequestClientDTO;
 import com.example.demo.ENTITIES.Client;
+import com.example.demo.MAPPERS.ClientMapper;
 import com.example.demo.REPOSITORIES.ClientRepository;
 import com.example.demo.SERVICES.ClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +20,7 @@ import java.util.UUID;
 public class ClientController {
     private final ClientService clientService;
     private final ClientRepository clientRepository;
+    private final ClientMapper clientMapper;
 
     @GetMapping
     public ResponseEntity<List<Client>> getAllClients() {
@@ -33,10 +37,29 @@ public class ClientController {
                 request.codePostal(),
                 request.phoneNumber(),
                 request.mail_address(),
-                request.ICE());
+                request.ice());
         client.setPublicId(UUID.randomUUID());
         clientRepository.save(client);
         return ResponseEntity.ok(client);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Client> getClientById(@PathVariable Long id){
+        return clientRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable Long id,
+                                       @RequestBody RequestClientDTO updated) {
+
+        Client client = clientRepository.findById(id).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template not found"));
+
+        clientMapper.updateFromDto(updated, client);
+        clientRepository.save(client);
+        return ResponseEntity.noContent().build();
     }
 
 

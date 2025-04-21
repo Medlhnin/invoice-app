@@ -13,7 +13,6 @@ public record InvoiceRequestDTO(UUID publicId,
                                 double deposit,
                                 String mode,
                                 LocalDateTime expectedDateTime,
-                                LocalDateTime dueDate,
-                                Frequency frequency
+                                LocalDateTime dueDate
                          ) {
 }

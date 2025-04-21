@@ -2,14 +2,15 @@ package com.example.demo.JOBS;
 
 
 import com.example.demo.ENTITIES.Invoice;
+import com.example.demo.ENTITIES.ScheduledInvoice;
 import com.example.demo.ENUMS.Frequency;
 import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.Mode;
 import com.example.demo.REPOSITORIES.InvoiceRepository;
+import com.example.demo.REPOSITORIES.ScheduledInvoiceRepository;
 import com.example.demo.SERVICES.InvoiceService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -22,56 +23,59 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ScheduledInvoiceJob {
 
+    private final ScheduledInvoiceRepository scheduledInvoiceRepository;
     private final InvoiceRepository invoiceRepository;
     private final InvoiceService invoiceService;
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ScheduledInvoiceJob.class);
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void generatePeriodicInvoices() throws IOException, MessagingException {
-        logger.info("generatePeriodicInvoices has executed");
-        List<Invoice> recurringInvoices = invoiceRepository.findAllByFrequencyNot(Frequency.NONE);
+    @Scheduled(cron = "0 * * * * *")
+    public void generateInvoicesFromTemplates() throws MessagingException, IOException {
+        List<ScheduledInvoice> templates = scheduledInvoiceRepository.findAll();
 
-        for (Invoice invoice : recurringInvoices) {
-            // On considère uniquement les factures créées automatiquement
-            if (invoice.getMode() == Mode.SCHEDULED) {
-                LocalDateTime lastDateTime = invoice.getDateFacture();
+        for (ScheduledInvoice template : templates) {
+            LocalDateTime last = template.getLastGenerated();
+            LocalDateTime nextDate = calculateNextDueDate(last, template.getFrequency());
 
-                LocalDateTime nextDueDateTime = switch (invoice.getFrequency()) {
-                    case MINUTELY -> lastDateTime.plusMinutes(1);
-                    case WEEKLY -> lastDateTime.plusWeeks(1);
-                    case MONTHLY -> lastDateTime.plusMonths(1);
-                    case QUARTERLY -> lastDateTime.plusMonths(3);
-                    case ANNUALLY -> lastDateTime.plusYears(1);
-                    default -> null;
-                };
+            if (nextDate != null && !nextDate.isAfter(LocalDateTime.now())) {
+                Invoice invoice = generateInvoiceFromTemplate(template);
+                invoiceRepository.save(invoice);
 
-                if (nextDueDateTime != null && !nextDueDateTime.isAfter(LocalDateTime.now())) {
-                    // Générer une nouvelle facture
-                    Invoice newInvoice = cloneInvoiceForNextPeriod(invoice);
-                    invoiceRepository.save(newInvoice);
-                    logger.info("Invoice saved.");
-                    invoiceService.SendEmailAndChangeInvoiceStatus(invoice);
-                    logger.info("Invoice has been sent to the client: {}", invoice.getClient().getNameEnterprise());
+                template.setLastGenerated(LocalDateTime.now());
+                scheduledInvoiceRepository.save(template);
 
-                }
+                invoiceService.SendEmailAndChangeInvoiceStatus(invoice);
             }
         }
     }
 
-    private Invoice cloneInvoiceForNextPeriod(Invoice original) {
+    private Invoice generateInvoiceFromTemplate(ScheduledInvoice template) {
         Invoice invoice = new Invoice();
-        invoice.setClient(original.getClient());
-        invoice.setDestination(original.getDestination());
-        invoice.setProjectDescription(original.getProjectDescription());
-        invoice.setAmount(original.getAmount());
+        invoice.setScheduledSource(template);
+        invoice.setClient(template.getClient());
+        invoice.setProjectDescription(template.getProjectDescription());
+        invoice.setAmount(template.getAmount());
+        invoice.setTva(template.getTva());
+        invoice.setFees_disbursements(template.getFees_disbursements());
+        invoice.setDeposit(template.getDeposit());
+        invoice.setDestination(template.getDestination());
         invoice.setDateFacture(LocalDateTime.now());
-        invoice.setMode(Mode.SCHEDULED);
-        invoice.setTva(original.getTva());
-        invoice.setFees_disbursements(original.getFees_disbursements());
-        invoice.setDeposit(original.getDeposit());
         invoice.setInvoiceStatus(InvoiceStatus.Draft);
-        invoice.setFrequency(original.getFrequency());
+        invoice.setMode(Mode.SCHEDULED);
+        invoice.setDueDate(LocalDateTime.now().plusDays(template.getDelaiEnJours()));
+
         return invoice;
+    }
+
+    private LocalDateTime calculateNextDueDate(LocalDateTime last, Frequency frequency) {
+        if (last == null) return LocalDateTime.now();
+
+        return switch (frequency) {
+            case MINUTELY -> last.plusMinutes(1);
+            case WEEKLY -> last.plusWeeks(1);
+            case MONTHLY -> last.plusMonths(1);
+            case QUARTERLY -> last.plusMonths(3);
+            case ANNUALLY -> last.plusYears(1);
+            default -> null;
+        };
     }
 
 

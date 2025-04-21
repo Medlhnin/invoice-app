@@ -24,7 +24,6 @@ public class Invoice {
     private Long id;
     @ManyToOne
     @JoinColumn(name = "client_id")
-    @JsonIgnore
     private Client client;
     private String destination;
     private LocalDateTime dateFacture ;
@@ -41,11 +40,12 @@ public class Invoice {
     private PaymentMethod paymentMethod;
     private Long cheque_number;
     private Long remise_number;
-    private LocalDate datePayment;
+    private LocalDateTime datePayment;
     private LocalDateTime expectedDate;
     private LocalDateTime dueDate;
-    @Enumerated(EnumType.STRING)
-    private Frequency frequency;
+    @ManyToOne
+    @JoinColumn(name = "scheduled_invoice_id")
+    private ScheduledInvoice scheduledSource;
 
     public boolean isEmailSent(){
         return this.invoiceStatus != InvoiceStatus.Draft;

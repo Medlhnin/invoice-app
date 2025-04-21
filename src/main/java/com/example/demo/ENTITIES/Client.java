@@ -29,13 +29,13 @@ public class Client {
     private int codePostal;
     private String phoneNumber;
     private String mail_address;
-    private int ICE;
+    private int ice;
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Invoice> invoices;
 
     public Client(String nameEnterprise, String nameContact, String address, String ville, int codePostal,
-                  String phoneNumber, String mail_address, int ICE)
+                  String phoneNumber, String mail_address, int ice)
     {
         this.publicId = UUID.randomUUID();
         this.address = address;
@@ -45,7 +45,7 @@ public class Client {
         this.codePostal = codePostal;
         this.phoneNumber = phoneNumber;
         this.mail_address = mail_address;
-        this.ICE = ICE;
+        this.ice = ice;
     }
 
 

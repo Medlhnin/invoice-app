@@ -28,6 +28,7 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final InvoiceTriggerFactory triggerFactory;
     private final TaskScheduler taskScheduler;
+    private final AbstractEmailService abstractEmailService;
     private final PostmarkEmailService postmarkEmailService;
     private final EmailService emailService;
     private final PdfGeneratorService pdfGeneratorService;
@@ -64,17 +65,28 @@ public class InvoiceService {
 
     public void SendEmailAndChangeInvoiceStatus(Invoice invoice) throws MessagingException, IOException {
         if (!invoice.isEmailSent()) {
+
+            // Invoice PDF generation
             byte[] pdf = pdfGeneratorService.generatePdfFromInvoice(invoice);
-            emailService.sendEmailWithAttachment(
+            // Build URL to confirm the reception
+            String confirmationUrl = "http://localhost:9001/api/v1/invoice/confirm?id=" + invoice.getId();
+
+            // Send email
+            emailService.sendEmail(
                     invoice.getDestination(),
-                    "Votre facture est prête",
+                    "📄 Votre facture est prête",
                     "Veuillez trouver ci-joint votre facture.",
                     pdf,
-                    "facture-" + invoice.getId() + ".pdf"
+                    "facture-" + invoice.getId() + ".pdf",
+                    confirmationUrl
             );
+
+            // Update the status
             invoice.setInvoiceStatus(InvoiceStatus.Sent);
-            logger.info("Invoice status has changed and email sent to {}", invoice.getDestination() );
+            logger.info("Invoice status has changed and email sent to {}", invoice.getDestination());
+
             invoiceRepository.save(invoice);
         }
     }
+
 }

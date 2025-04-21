@@ -1,7 +1,5 @@
 package com.example.demo.SERVICES;
 
-import com.example.demo.DTOs.InvoiceRequestDTO;
-import com.example.demo.DTOs.RequestClientDTO;
 import com.example.demo.ENTITIES.Client;
 import com.example.demo.ENTITIES.Invoice;
 import com.example.demo.REPOSITORIES.ClientRepository;
@@ -37,7 +35,7 @@ public class HtmlGeneratorService {
         data.put("clientAddress", client.getAddress());
         data.put("clientCity", client.getVille());
         data.put("clientPhone", client.getPhoneNumber());
-        data.put("clientICE", client.getICE());
+        data.put("clientICE", client.getIce());
         data.put("clientEmail", client.getMail_address());
         data.put("dueDate", invoice.getDueDate());
 
@@ -49,6 +47,7 @@ public class HtmlGeneratorService {
 
         data.put("fees", invoice.getAmount());
         data.put("disbursements", invoice.getFees_disbursements());
+        data.put("diposit", invoice.getDeposit());
         data.put("tva", invoice.getTva());
         data.put("total", invoice.getAmount() + invoice.getFees_disbursements() + invoice.getTva());
 

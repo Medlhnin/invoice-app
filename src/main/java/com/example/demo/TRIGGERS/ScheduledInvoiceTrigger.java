@@ -36,7 +36,6 @@ public class ScheduledInvoiceTrigger implements InvoiceTriggerStrategy {
         invoice.setDeposit(request.deposit());
         invoice.setInvoiceStatus(InvoiceStatus.Draft);
         invoice.setExpectedDate(request.expectedDateTime());
-        invoice.setFrequency(request.frequency());
         invoiceRepository.save(invoice);
         logger.info("Scheduled invoice saved");
         return invoice;
