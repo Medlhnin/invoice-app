@@ -30,14 +30,8 @@ public class ClientController {
 
     @PostMapping
     public ResponseEntity<Client> createClient(@RequestBody RequestClientDTO request) {
-        Client client = new Client(request.nameEnterprise(),
-                request.nameContact(),
-                request.address(),
-                request.ville(),
-                request.codePostal(),
-                request.phoneNumber(),
-                request.mail_address(),
-                request.ice());
+        Client client = new Client();
+        clientMapper.updateFromDto(request, client);
         client.setPublicId(UUID.randomUUID());
         clientRepository.save(client);
         return ResponseEntity.ok(client);

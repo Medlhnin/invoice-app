@@ -32,6 +32,8 @@ public class ScheduledInvoice {
 
     @Enumerated(EnumType.STRING)
     private Mode mode = Mode.SCHEDULED;
+    private boolean active = true;
+
 
     private LocalDateTime lastGenerated;
 }

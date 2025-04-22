@@ -9,6 +9,8 @@ import com.example.demo.MAPPERS.ScheduledInvoiceMapper;
 import com.example.demo.REPOSITORIES.ScheduledInvoiceRepository;
 import com.example.demo.SERVICES.ScheduledInvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,7 @@ import java.util.Optional;
 public class ScheduledInvoiceController {
     private final ScheduledInvoiceRepository repository;
     private final ScheduledInvoiceService scheduledInvoiceService;
+    private static final Logger logger = LoggerFactory.getLogger(ScheduledInvoiceController.class);
     private final ScheduledInvoiceMapper scheduledInvoiceMapper;
 
     @PostMapping
@@ -56,14 +59,6 @@ public class ScheduledInvoiceController {
                                        @RequestBody ScheduledInvoiceRequest updated) {
         ScheduledInvoice scheduledInvoice = repository.findById(id).
                 orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Template not found"));
-
-        /* scheduledInvoice.setProjectDescription(updated.projectDescription());
-        scheduledInvoice.setTva(updated.tva());
-        scheduledInvoice.setFees_disbursements(updated.fees_disbursements());
-        scheduledInvoice.setDeposit(updated.deposit());
-        scheduledInvoice.setAmount(updated.amount());
-        scheduledInvoice.setFrequency(updated.frequency());
-        scheduledInvoice.setDelaiEnJours(updated.delaiEnJours()); */
 
         scheduledInvoiceMapper.updateFromDto(updated, scheduledInvoice);
         repository.save(scheduledInvoice);
@@ -98,6 +93,27 @@ public class ScheduledInvoiceController {
         invoice.setMode(Mode.SCHEDULED);
 
         return ResponseEntity.ok(invoice);
+    }
+
+    @PutMapping("/{id}/deactivate")
+    public ResponseEntity<Void> deactivateScheduledInvoice(@PathVariable Long id) {
+        ScheduledInvoice scheduledInvoice = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Modèle non trouvé"));
+
+        logger.info("Invoice deactivated");
+        scheduledInvoice.setActive(false);
+        repository.save(scheduledInvoice);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/activate")
+    public ResponseEntity<Void> activateScheduledInvoice(@PathVariable Long id) {
+        ScheduledInvoice scheduledInvoice = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Modèle non trouvé"));
+
+        scheduledInvoice.setActive(true);
+        repository.save(scheduledInvoice);
+        return ResponseEntity.noContent().build();
     }
 
 }

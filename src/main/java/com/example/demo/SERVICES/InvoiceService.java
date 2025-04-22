@@ -4,8 +4,8 @@ import com.example.demo.DTOs.InvoiceRequestDTO;
 import com.example.demo.ENTITIES.Client;
 import com.example.demo.ENTITIES.Invoice;
 import com.example.demo.ENUMS.InvoiceStatus;
-import com.example.demo.FACTORIES.InvoiceTriggerFactory;
-import com.example.demo.INTERFACES.InvoiceTriggerStrategy;
+import com.example.demo.ENUMS.Mode;
+import com.example.demo.MAPPERS.InvoiceMapper;
 import com.example.demo.REPOSITORIES.ClientRepository;
 import com.example.demo.REPOSITORIES.InvoiceRepository;
 import jakarta.mail.MessagingException;
@@ -26,28 +26,33 @@ public class InvoiceService {
 
     private final ClientRepository clientRepository;
     private final InvoiceRepository invoiceRepository;
-    private final InvoiceTriggerFactory triggerFactory;
     private final TaskScheduler taskScheduler;
-    private final AbstractEmailService abstractEmailService;
-    private final PostmarkEmailService postmarkEmailService;
     private final EmailService emailService;
     private final PdfGeneratorService pdfGeneratorService;
+    private final InvoiceMapper invoiceMapper;
     private static final Logger logger = LoggerFactory.getLogger(InvoiceService.class);
 
     public Invoice createInvoice(InvoiceRequestDTO request) throws MessagingException, IOException {
         Client client = clientRepository.findByPublicId(request.publicId())
                 .orElseThrow(() -> new RuntimeException("Client not found"));
+        Invoice invoice = new Invoice();
+        invoiceMapper.requestToInvoice(request, invoice);
 
-        InvoiceTriggerStrategy strategy = triggerFactory.getStrategy(request.mode());
-        logger.info("create has been enabled");
-        Invoice invoice = strategy.triggerInvoice(client, request);
+        invoice.setClient(client);
+        invoice.setDestination(client.getMail_address());
+        invoice.setDateFacture(LocalDateTime.now());
+        invoice.setMode(Mode.MANUEL);
+        invoice.setInvoiceStatus(InvoiceStatus.Draft);
+        logger.info("Invoice created");
+        invoiceRepository.save(invoice);
+        logger.info("Invoice saved");
         SendEmailTreatment(invoice);
         return invoice;
     }
 
     public void SendEmailTreatment(Invoice invoice) throws MessagingException, IOException {
-        if (invoice.getExpectedDate() == null || invoice.getExpectedDate().isBefore(LocalDateTime.now())) {
-            logger.info("Expected date is {}", invoice.getExpectedDate());
+        if (invoice.getExpectedDateTime() == null || invoice.getExpectedDateTime().isBefore(LocalDateTime.now())) {
+            logger.info("Expected date is {}", invoice.getExpectedDateTime());
             logger.info("email already sent");
             SendEmailAndChangeInvoiceStatus(invoice);
         } else {
@@ -59,19 +64,17 @@ public class InvoiceService {
                             throw new RuntimeException(e);
                         }
                     },
-                    Date.from(invoice.getExpectedDate().atZone(ZoneId.systemDefault()).toInstant()));
+                    Date.from(invoice.getExpectedDateTime().atZone(ZoneId.systemDefault()).toInstant()));
         }
     }
 
     public void SendEmailAndChangeInvoiceStatus(Invoice invoice) throws MessagingException, IOException {
         if (!invoice.isEmailSent()) {
 
-            // Invoice PDF generation
             byte[] pdf = pdfGeneratorService.generatePdfFromInvoice(invoice);
-            // Build URL to confirm the reception
+
             String confirmationUrl = "http://localhost:9001/api/v1/invoice/confirm?id=" + invoice.getId();
 
-            // Send email
             emailService.sendEmail(
                     invoice.getDestination(),
                     "📄 Votre facture est prête",

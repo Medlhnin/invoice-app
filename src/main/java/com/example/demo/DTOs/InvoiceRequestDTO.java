@@ -1,7 +1,5 @@
 package com.example.demo.DTOs;
 
-import com.example.demo.ENUMS.Frequency;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 

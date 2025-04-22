@@ -1,13 +1,11 @@
 package com.example.demo.CONTROLLERS;
 
-import com.example.demo.DTOs.EmailDTO;
 import com.example.demo.DTOs.InvoiceRequestDTO;
 import com.example.demo.ENTITIES.Invoice;
 import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.PaymentMethod;
 import com.example.demo.REPOSITORIES.InvoiceRepository;
 import com.example.demo.SERVICES.InvoiceService;
-import com.example.demo.SERVICES.PostmarkEmailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -20,7 +18,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +30,7 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
     private final InvoiceRepository invoiceRepository;
     private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
-    private final PostmarkEmailService postmarkEmailService;
+
 
     @PostMapping
     public ResponseEntity<Void> triggerInvoice(@RequestBody InvoiceRequestDTO invoiceRequestDTO
@@ -41,7 +38,7 @@ public class InvoiceController {
         logger.info("triggerInvoice has been enabled");
         Invoice invoice = invoiceService.createInvoice(invoiceRequestDTO);
         URI locationOfInvoice = ucb
-                .path("api/v1/invoice")
+                .path("api/v1/invoice/{id}")
                 .buildAndExpand(invoice.getId())
                 .toUri();
 
@@ -54,12 +51,6 @@ public class InvoiceController {
         return ResponseEntity.ok(invoices);
     }
 
-    @PostMapping("/send")
-    public ResponseEntity<Void> sentEmail(@RequestBody EmailDTO emailDTO){
-        postmarkEmailService.sendEmail(emailDTO.to(), emailDTO.subject(), emailDTO.text());
-        logger.info("Controller");
-        return ResponseEntity.noContent().build();
-    }
 
     @PutMapping("/{id}/payment")
     public ResponseEntity<Void> updatePaymentInfo(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
@@ -87,6 +78,17 @@ public class InvoiceController {
         invoiceRepository.save(invoice);
 
         return ResponseEntity.ok("Merci pour votre confirmation !");
+    }
+
+    @GetMapping("/{id}/validate")
+    public ResponseEntity<String> validInvoice(@PathVariable Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        invoice.setInvoiceStatus(InvoiceStatus.Valid);
+        invoiceRepository.save(invoice);
+
+        return ResponseEntity.ok("La facture est bien validée");
     }
 
 

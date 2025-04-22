@@ -1,15 +1,11 @@
 package com.example.demo.ENTITIES;
 
-import com.example.demo.ENUMS.Frequency;
 import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.Mode;
 import com.example.demo.ENUMS.PaymentMethod;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-import org.apache.el.parser.AstFalse;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,7 +37,7 @@ public class Invoice {
     private Long cheque_number;
     private Long remise_number;
     private LocalDateTime datePayment;
-    private LocalDateTime expectedDate;
+    private LocalDateTime expectedDateTime;
     private LocalDateTime dueDate;
     @ManyToOne
     @JoinColumn(name = "scheduled_invoice_id")

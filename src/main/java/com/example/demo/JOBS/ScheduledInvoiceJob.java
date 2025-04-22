@@ -29,7 +29,7 @@ public class ScheduledInvoiceJob {
 
     @Scheduled(cron = "0 * * * * *")
     public void generateInvoicesFromTemplates() throws MessagingException, IOException {
-        List<ScheduledInvoice> templates = scheduledInvoiceRepository.findAll();
+        List<ScheduledInvoice> templates = scheduledInvoiceRepository.findAllByActiveTrue();
 
         for (ScheduledInvoice template : templates) {
             LocalDateTime last = template.getLastGenerated();
