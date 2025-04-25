@@ -27,6 +27,7 @@ public class InvoiceService {
     private final ClientRepository clientRepository;
     private final InvoiceRepository invoiceRepository;
     private final TaskScheduler taskScheduler;
+    /* private final ConcurrentHashMap<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>(); */
     private final EmailService emailService;
     private final PdfGeneratorService pdfGeneratorService;
     private final InvoiceMapper invoiceMapper;
@@ -46,7 +47,6 @@ public class InvoiceService {
         logger.info("Invoice created");
         invoiceRepository.save(invoice);
         logger.info("Invoice saved");
-        SendEmailTreatment(invoice);
         return invoice;
     }
 
@@ -67,6 +67,39 @@ public class InvoiceService {
                     Date.from(invoice.getExpectedDateTime().atZone(ZoneId.systemDefault()).toInstant()));
         }
     }
+
+    /* public void SendEmailTreatmentv1(Invoice invoice) throws MessagingException, IOException {
+        if (invoice.getExpectedDateTime() == null || invoice.getExpectedDateTime().isBefore(LocalDateTime.now())) {
+            logger.info("Expected date is {}", invoice.getExpectedDateTime());
+            logger.info("email already sent");
+            SendEmailAndChangeInvoiceStatus(invoice);
+        } else {
+            logger.info("email is waiting to be sent");
+
+            ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(() -> {
+                try {
+                    SendEmailAndChangeInvoiceStatus(invoice);
+                } catch (MessagingException | IOException e) {
+                    logger.error("Error while sending scheduled email for invoice {}", invoice.getId(), e);
+                    throw new RuntimeException(e);
+                } finally {
+                    scheduledTasks.remove(invoice.getId());
+                }
+            }, Date.from(invoice.getExpectedDateTime().atZone(ZoneId.systemDefault()).toInstant()));
+
+            scheduledTasks.put(invoice.getId(), scheduledFuture);
+        }
+    }
+
+    public void cancelScheduledEmail(Long invoiceId) {
+        ScheduledFuture<?> future = scheduledTasks.remove(invoiceId);
+        if (future != null && !future.isDone()) {
+            future.cancel(false);
+            logger.info("Scheduled email task for invoice {} has been canceled.", invoiceId);
+        } else {
+            logger.info("No scheduled task found or already executed for invoice {}", invoiceId);
+        }
+    } */
 
     public void SendEmailAndChangeInvoiceStatus(Invoice invoice) throws MessagingException, IOException {
         if (!invoice.isEmailSent()) {

@@ -5,12 +5,15 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.demo.DTOs.UserDto;
-import com.example.demo.SERVICES.UserService;
+import com.example.demo.ENTITIES.Utilisateur;
+import com.example.demo.Exceptions.AppException;
+import com.example.demo.REPOSITORIES.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,7 +30,7 @@ import java.util.List;
 public class UserAuthenticationProvider {
     @Value("${security.jwt.token.secret-key:secret-key}")
     private String secretKey;
-    private final UserService userService;
+    private final UserRepository userRepository;
     private static final Logger logger = LoggerFactory.getLogger(UserAuthenticationProvider.class);
 
     @PostConstruct
@@ -53,34 +56,7 @@ public class UserAuthenticationProvider {
     }
 
     public Authentication validateToken(String token) {
-        logger.info("🔍 Début de validation du token...");
-        Algorithm algorithm = Algorithm.HMAC256(secretKey); // Use of Hashing256 for decryption
-
-        JWTVerifier verifier = JWT.require(algorithm)
-                .build();
-
-        DecodedJWT decoded = verifier.verify(token);
-
-        logger.info("✅ Token validé avec succès !");
-        logger.info("👤 Utilisateur : {}", decoded.getSubject());
-        logger.info("🔖 Rôle : {}", decoded.getClaim("role").asString());
-
-        String role = decoded.getClaim("role").asString();
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-
-        UserDto user = UserDto.builder()
-                .username(decoded.getSubject())
-                .firstname(decoded.getClaim("firstname").asString())
-                .lastname(decoded.getClaim("lastname").asString())
-                .role(role)
-                .email(decoded.getClaim("email").asString())
-                .build();
-
-        return new UsernamePasswordAuthenticationToken(user, null, authorities);
-    }
-
-    public Authentication validateTokenStrongly(String token) {
-        logger.info("🔍 Début de validation du token...");
+        logger.info("🔍 Starting token validation...");
         Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
         JWTVerifier verifier = JWT.require(algorithm)
@@ -88,14 +64,34 @@ public class UserAuthenticationProvider {
 
         DecodedJWT decoded = verifier.verify(token);
 
-        logger.info("✅ Token validé avec succès !");
-        logger.info("👤 Utilisateur : {}", decoded.getSubject());
-        logger.info("🔖 Rôle : {}", decoded.getClaim("role").asString());
+        logger.info("✅ Token successfully validated!");
+        logger.info("👤 User : {}", decoded.getSubject());
+        logger.info("🔖 Role : {}", decoded.getClaim("role").asString());
 
         String role = decoded.getClaim("role").asString();
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-        UserDto user = userService.findByLogin(decoded.getSubject());
+        Utilisateur user = userRepository.findByUsername(decoded.getSubject())
+                .orElseThrow(() -> new AppException("USER NOT FOUND", HttpStatus.NOT_FOUND));
+        return new UsernamePasswordAuthenticationToken(user, null, authorities);
+    }
+
+    public Authentication validateTokenStrongly(String token) {
+        logger.info("🔍 Starting token strong validation...");
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+
+        JWTVerifier verifier = JWT.require(algorithm)
+                .build();
+
+        DecodedJWT decoded = verifier.verify(token);
+
+        logger.info("✅ Token strongly successfully validated!");
+
+        String role = decoded.getClaim("role").asString();
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+
+        Utilisateur user = userRepository.findByUsername(decoded.getSubject())
+                .orElseThrow(() -> new AppException("USER NOT FOUND", HttpStatus.NOT_FOUND));
 
         return new UsernamePasswordAuthenticationToken(user, null, authorities);
     }

@@ -37,12 +37,13 @@ public class ScheduledInvoiceJob {
 
             if (nextDate != null && !nextDate.isAfter(LocalDateTime.now())) {
                 Invoice invoice = generateInvoiceFromTemplate(template);
+                invoice.setExpectedDateTime(LocalDateTime.now());
                 invoiceRepository.save(invoice);
 
                 template.setLastGenerated(LocalDateTime.now());
                 scheduledInvoiceRepository.save(template);
 
-                invoiceService.SendEmailAndChangeInvoiceStatus(invoice);
+                // invoiceService.SendEmailAndChangeInvoiceStatus(invoice);
             }
         }
     }

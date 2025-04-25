@@ -29,28 +29,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         String path = request.getServletPath();
 
-        logger.info("📌 Requête reçue sur le chemin : {}", path);
+        logger.info("📌 Request received on the path : {}", path);
 
         if (path.equals("/api/v1/user/register") || path.equals("/api/v1/user/login")) {
-            logger.info("🔓 Pas besoin de JWT pour {}", path);
+            logger.info("🔓 No JWT required for {}", path);
             filterChain.doFilter(request, response);
             return;
         }
 
         if (header != null) {
-            logger.info("✅ Header Authorization reçu : {}", header);
+            logger.info("✅ Authorization header received : {}", header);
 
             String[] authElements = header.split(" ");
             if (authElements.length == 2 && "Bearer".equals(authElements[0])) {
                 try {
                     if ("GET".equals(request.getMethod())) {
-                        logger.info("🔍 Validation simple du token pour GET");
+                        logger.info("🔍 Basic token verification for GET");
                         SecurityContextHolder.getContext().setAuthentication(
                                 userAuthenticationProvider.validateToken(authElements[1]));
 
 
                     } else {
-                        logger.info("🔒 Validation renforcée du token pour {}", request.getMethod());
+                        logger.info("🔒 Advanced token validation for {}", request.getMethod());
                         SecurityContextHolder.getContext().setAuthentication(
                                 userAuthenticationProvider.validateTokenStrongly(authElements[1]));
 
@@ -58,22 +58,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     }
                     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                     if (auth != null) {
-                        logger.info("\uD83D\uDD0D Rôles attribués après authentification : {}", auth.getAuthorities());
+                        logger.info("\uD83D\uDD0D Permissions assigned upon successful auth : {}", auth.getAuthorities());
                     }
                 } catch (RuntimeException e) {
-                    logger.error("❌ Erreur lors de la validation du token : {}", e.getMessage());
+                    logger.error("❌ Error during token validation : {}", e.getMessage());
                     SecurityContextHolder.clearContext();
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("Invalid or expired JWT token");
                     return;
                 }
             } else {
-                logger.warn("⚠️ Format du token invalide !");
+                logger.warn("⚠️ Malformed token !");
             }
         } else {
-            logger.warn("⚠️ Aucun header Authorization trouvé !");
+            logger.warn("⚠️ No Authorization header found !");
         }
-        logger.info("🔍 Utilisateur après authentification : " + SecurityContextHolder.getContext().getAuthentication());
+        logger.info("\uD83D\uDD0D User post-authentication : {}", SecurityContextHolder.getContext().getAuthentication());
         filterChain.doFilter(request, response);
     }
 }

@@ -1,9 +1,12 @@
 package com.example.demo.CONTROLLERS;
 
 import com.example.demo.DTOs.InvoiceRequestDTO;
+import com.example.demo.DTOs.RequestClientDTO;
+import com.example.demo.ENTITIES.Client;
 import com.example.demo.ENTITIES.Invoice;
 import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.PaymentMethod;
+import com.example.demo.MAPPERS.InvoiceMapper;
 import com.example.demo.REPOSITORIES.InvoiceRepository;
 import com.example.demo.SERVICES.InvoiceService;
 import jakarta.mail.MessagingException;
@@ -29,13 +32,13 @@ public class InvoiceController {
 
     private final InvoiceService invoiceService;
     private final InvoiceRepository invoiceRepository;
+    private final InvoiceMapper invoiceMapper;
     private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
 
 
     @PostMapping
     public ResponseEntity<Void> triggerInvoice(@RequestBody InvoiceRequestDTO invoiceRequestDTO
                                               , UriComponentsBuilder ucb) throws MessagingException, IOException {
-        logger.info("triggerInvoice has been enabled");
         Invoice invoice = invoiceService.createInvoice(invoiceRequestDTO);
         URI locationOfInvoice = ucb
                 .path("api/v1/invoice/{id}")
@@ -49,6 +52,13 @@ public class InvoiceController {
     public ResponseEntity<List<Invoice>> getAllInvoices(){
         List<Invoice> invoices = invoiceRepository.findAll();
         return ResponseEntity.ok(invoices);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Invoice> getInvoice(@PathVariable Long id){
+        return invoiceRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
 
@@ -80,18 +90,58 @@ public class InvoiceController {
         return ResponseEntity.ok("Merci pour votre confirmation !");
     }
 
-    @GetMapping("/{id}/validate")
-    public ResponseEntity<String> validInvoice(@PathVariable Long id) {
+    @PutMapping("/{id}/validate")
+    public ResponseEntity<Void> validInvoice(@PathVariable Long id) throws MessagingException, IOException {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         invoice.setInvoiceStatus(InvoiceStatus.Valid);
+        logger.info("Invoice validated");
+        /* invoiceService.SendEmailTreatment(invoice);
+        logger.info("SendEmailTreatment is used"); */
         invoiceRepository.save(invoice);
 
-        return ResponseEntity.ok("La facture est bien validée");
+        return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}/revert")
+    public ResponseEntity<Void> revertInvoice(@PathVariable Long id){
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        invoice.setInvoiceStatus(InvoiceStatus.Draft);
+        /* invoiceService.cancelScheduledEmail(id); */
+        invoiceRepository.save(invoice);
 
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable Long id,
+                                       @RequestBody InvoiceRequestDTO updatedRequest) {
+
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "INVOICE NOT FOUND"));
+
+        if (invoice.getInvoiceStatus() == InvoiceStatus.Draft) {
+            invoiceMapper.requestToInvoice(updatedRequest, invoice);
+            invoiceRepository.save(invoice);
+            return ResponseEntity.noContent().build();
+        } else {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Only invoices with status 'Draft' can be updated"
+            );
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        Invoice invoice = invoiceRepository.findById(id).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "REMOVED Client NOT FOUND "));
+        invoiceRepository.delete(invoice);
+        return ResponseEntity.noContent().build();
+
+    }
 
 
 }
