@@ -5,6 +5,7 @@ import com.example.demo.ENTITIES.Invoice;
 import com.example.demo.ENTITIES.ScheduledInvoice;
 import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.Mode;
+import com.example.demo.MAPPERS.InvoiceMapper;
 import com.example.demo.MAPPERS.ScheduledInvoiceMapper;
 import com.example.demo.REPOSITORIES.ScheduledInvoiceRepository;
 import com.example.demo.SERVICES.ScheduledInvoiceService;
@@ -30,6 +31,7 @@ public class ScheduledInvoiceController {
     private final ScheduledInvoiceService scheduledInvoiceService;
     private static final Logger logger = LoggerFactory.getLogger(ScheduledInvoiceController.class);
     private final ScheduledInvoiceMapper scheduledInvoiceMapper;
+    private final InvoiceMapper invoiceMapper;
 
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody ScheduledInvoiceRequest scheduledInvoiceRequest,
@@ -81,13 +83,14 @@ public class ScheduledInvoiceController {
         ScheduledInvoice template = optional.get();
         Invoice invoice = new Invoice();
 
-        invoice.setClient(template.getClient());
-        invoice.setProjectDescription(template.getProjectDescription());
-        invoice.setAmount(template.getAmount());
-        invoice.setTva(template.getTva());
-        invoice.setFees_disbursements(template.getFees_disbursements());
-        invoice.setDeposit(template.getDeposit());
-        invoice.setDestination(template.getDestination());
+        // invoice.setClient(template.getClient());
+        // invoice.setProjectDescription(template.getProjectDescription());
+        // invoice.setAmount(template.getAmount());
+        // invoice.setTva(template.getTva());
+        // invoice.setFees_disbursements(template.getFees_disbursements());
+        // invoice.setDeposit(template.getDeposit());
+        // invoice.setDestination(template.getDestination());
+        invoiceMapper.scheduledInvoiceToInvoice(template, invoice);
         invoice.setDateFacture(LocalDateTime.now());
         invoice.setInvoiceStatus(InvoiceStatus.Draft);
         invoice.setMode(Mode.SCHEDULED);
