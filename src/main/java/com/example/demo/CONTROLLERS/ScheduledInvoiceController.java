@@ -83,13 +83,6 @@ public class ScheduledInvoiceController {
         ScheduledInvoice template = optional.get();
         Invoice invoice = new Invoice();
 
-        // invoice.setClient(template.getClient());
-        // invoice.setProjectDescription(template.getProjectDescription());
-        // invoice.setAmount(template.getAmount());
-        // invoice.setTva(template.getTva());
-        // invoice.setFees_disbursements(template.getFees_disbursements());
-        // invoice.setDeposit(template.getDeposit());
-        // invoice.setDestination(template.getDestination());
         invoiceMapper.scheduledInvoiceToInvoice(template, invoice);
         invoice.setDateFacture(LocalDateTime.now());
         invoice.setInvoiceStatus(InvoiceStatus.Draft);

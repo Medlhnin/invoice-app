@@ -16,8 +16,8 @@ import jakarta.activation.DataSource;
 public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
-    @Value("${spring.mail.username}")
-    private String email;
+    // @Value("${spring.mail.username}")
+    private String email = "lahnin.010@gmail.com";
     private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     public void sendEmail(String to,

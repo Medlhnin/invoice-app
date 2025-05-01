@@ -14,7 +14,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:4200", "http://localhost:4201")
+                        .allowedOrigins("user-invoicing-app-dya6h6ejbsc8hwgb.canadacentral-01.azurewebsites.net", "https://admin-invoicing-app-h3d2c3f4faewc8b0.canadacentral-01.azurewebsites.net")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
                         .allowCredentials(true);
