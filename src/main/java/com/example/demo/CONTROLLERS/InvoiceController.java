@@ -69,10 +69,10 @@ public class InvoiceController {
 
         invoice.setPaymentMethod(PaymentMethod.valueOf(payload.get("paymentMethod").toString()));
         invoice.setInvoiceStatus(InvoiceStatus.Paid);
-        invoice.setDatePayment(LocalDateTime.parse(payload.get("datePayment").toString()));
         if (invoice.getPaymentMethod() == PaymentMethod.CHEQUE) {
             invoice.setCheque_number(Long.parseLong(payload.get("cheque_number").toString()));
             invoice.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));
+            invoice.setDatePayment(LocalDateTime.parse(payload.get("datePayment").toString()));
         }
 
         invoiceRepository.save(invoice);
@@ -97,8 +97,6 @@ public class InvoiceController {
 
         invoice.setInvoiceStatus(InvoiceStatus.Valid);
         logger.info("Invoice validated");
-        /* invoiceService.SendEmailTreatment(invoice);
-        logger.info("SendEmailTreatment is used"); */
         invoiceRepository.save(invoice);
 
         return ResponseEntity.noContent().build();
