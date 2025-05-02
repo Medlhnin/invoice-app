@@ -29,7 +29,11 @@ public class ValidInvoiceJob {
 
         for (Invoice invoice : validInvoices) {
             if (invoice.getExpectedDateTime() != null && invoice.getExpectedDateTime().isBefore(now)) {
-                invoiceService.SendEmailTreatment(invoice);
+                try {
+                    invoiceService.SendEmailTreatment(invoice);
+                } catch (Exception e) {
+                    logger.error("❌ Erreur lors de l'envoi de l'email pour la facture ID {}", invoice.getId(), e);
+                }
                 invoice.setInvoiceStatus(InvoiceStatus.Sent);
                 logger.info("Facture ID {} est envoyée (date: {}).", invoice.getId(), invoice.getExpectedDateTime());
             }
