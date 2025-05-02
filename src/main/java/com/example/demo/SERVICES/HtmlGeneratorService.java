@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -51,8 +53,11 @@ public class HtmlGeneratorService {
         data.put("tva", invoice.getTva());
         data.put("total", invoice.getAmount() + invoice.getFees_disbursements() + invoice.getTva());
 
-        String css = new String(Files.readAllBytes(Paths.get("src/main/resources/static/css/template_style.css")), StandardCharsets.UTF_8);
-        data.put("css", css);
+        InputStream cssStream = getClass().getClassLoader().getResourceAsStream("static/css/template_style.css");
+        if (cssStream == null) throw new FileNotFoundException("template_style.css non trouvé dans les ressources.");
+        byte[] cssBytes = cssStream.readAllBytes();
+
+        data.put("css", cssBytes);
 
         context.setVariables(data);
 
