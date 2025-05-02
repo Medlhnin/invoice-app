@@ -44,7 +44,7 @@ public class Invoice {
     private ScheduledInvoice scheduledSource;
 
     public boolean isEmailSent(){
-        return this.invoiceStatus != InvoiceStatus.Draft;
+        return this.invoiceStatus != InvoiceStatus.Valid;
     }
 
 }

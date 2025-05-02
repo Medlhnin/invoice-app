@@ -28,6 +28,7 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final TaskScheduler taskScheduler;
     private final EmailService emailService;
+    private final AzureEmailService azureEmailService;
     private final PdfGeneratorService pdfGeneratorService;
     private final InvoiceMapper invoiceMapper;
     private static final Logger logger = LoggerFactory.getLogger(InvoiceService.class);
@@ -52,7 +53,6 @@ public class InvoiceService {
     public void SendEmailTreatment(Invoice invoice) throws MessagingException, IOException {
         if (invoice.getExpectedDateTime() == null || invoice.getExpectedDateTime().isBefore(LocalDateTime.now())) {
             logger.info("Expected date is {}", invoice.getExpectedDateTime());
-            logger.info("email already sent");
             SendEmailAndChangeInvoiceStatus(invoice);
         } else {
             logger.info("email is waiting to be sent");
@@ -68,9 +68,11 @@ public class InvoiceService {
     }
 
     public void SendEmailAndChangeInvoiceStatus(Invoice invoice) throws MessagingException, IOException {
+        logger.info("isEmailSent: {}", invoice.isEmailSent());
         if (!invoice.isEmailSent()) {
 
             byte[] pdf = pdfGeneratorService.generatePdfFromInvoice(invoice);
+            logger.info("PDF generated.");
 
             String confirmationUrl = "http://localhost:9001/api/v1/invoice/confirm?id=" + invoice.getId();
 
@@ -82,7 +84,7 @@ public class InvoiceService {
                     "facture-" + invoice.getId() + ".pdf",
                     confirmationUrl
             );
-
+            logger.info("email already sent");
             // Update the status
             invoice.setInvoiceStatus(InvoiceStatus.Sent);
             logger.info("Invoice status has changed and email sent to {}", invoice.getDestination());

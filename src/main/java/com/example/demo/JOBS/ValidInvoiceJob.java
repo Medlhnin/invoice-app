@@ -29,8 +29,8 @@ public class ValidInvoiceJob {
 
         for (Invoice invoice : validInvoices) {
             if (invoice.getExpectedDateTime() != null && invoice.getExpectedDateTime().isBefore(now)) {
-                invoice.setInvoiceStatus(InvoiceStatus.Sent);
                 invoiceService.SendEmailTreatment(invoice);
+                invoice.setInvoiceStatus(InvoiceStatus.Sent);
                 logger.info("Facture ID {} est envoyée (date: {}).", invoice.getId(), invoice.getExpectedDateTime());
             }
         }

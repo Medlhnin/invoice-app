@@ -14,7 +14,10 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://user-invoicing-app-dya6h6ejbsc8hwgb.canadacentral-01.azurewebsites.net/", "https://admin-invoicing-app-h3d2c3f4faewc8b0.canadacentral-01.azurewebsites.net")
+                        .allowedOrigins("https://user-invoicing-app-dya6h6ejbsc8hwgb.canadacentral-01.azurewebsites.net/",
+                                "https://admin-invoicing-app-h3d2c3f4faewc8b0.canadacentral-01.azurewebsites.net",
+                                "http://localhost:4200",
+                                "http://localhost:4201")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
                         .allowCredentials(true);
