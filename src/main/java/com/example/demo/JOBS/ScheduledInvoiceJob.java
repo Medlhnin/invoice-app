@@ -43,7 +43,6 @@ public class ScheduledInvoiceJob {
                 template.setLastGenerated(LocalDateTime.now());
                 scheduledInvoiceRepository.save(template);
 
-                // invoiceService.SendEmailAndChangeInvoiceStatus(invoice);
             }
         }
     }
