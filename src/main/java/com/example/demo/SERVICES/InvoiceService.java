@@ -42,6 +42,7 @@ public class InvoiceService {
         invoice.setClient(client);
         invoice.setDestination(client.getMail_address());
         invoice.setDateFacture(LocalDateTime.now());
+        invoice.setNumeroChronologique(genererNumeroChronologique(LocalDateTime.now()));
         invoice.setMode(Mode.MANUEL);
         invoice.setInvoiceStatus(InvoiceStatus.Draft);
         logger.info("Invoice created");
@@ -92,5 +93,15 @@ public class InvoiceService {
             invoiceRepository.save(invoice);
         }
     }
+
+    public String genererNumeroChronologique(LocalDateTime dateFacture) {
+        int year = dateFacture.getYear();
+        int month = dateFacture.getMonthValue();
+
+        long counter = invoiceRepository.countByMonth(year, month);
+
+        return String.format("%04d-%02d-%d", year, month, counter + 1);
+    }
+
 
 }

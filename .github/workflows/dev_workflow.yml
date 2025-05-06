@@ -1,0 +1,58 @@
+# CI/CD - Déploiement DEV sans Docker (même logique que PROD)
+
+name: Build and deploy JAR app to Azure Web App - invoicing-app-dev
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java version
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: mvn clean install -DskipTests
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/target/*.jar'
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'development'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: java-app
+
+      - name: List files in target directory
+        run: ls -l ${{ github.workspace }}/target
+
+      - name: Deploy to Azure Web App (Dev)
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'invoicing-app-dev'
+          slot-name: 'production'
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_invoicing_app_dev }}
+          package: '*.jar'

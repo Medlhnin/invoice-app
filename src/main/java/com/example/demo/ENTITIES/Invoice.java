@@ -21,6 +21,8 @@ public class Invoice {
     @ManyToOne
     @JoinColumn(name = "client_id")
     private Client client;
+    @Column(name = "numero_chronologique", unique = true)
+    private String numeroChronologique;
     private String destination;
     private LocalDateTime dateFacture ;
     private String projectDescription;
