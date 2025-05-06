@@ -1,5 +1,5 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# 🚀 CI/CD pour environnement de développement
+# Déploie une app conteneurisée dans Azure Web App - invoicing-app-dev
 
 name: Build and deploy container app to Azure Web App - invoicing-app-dev
 
@@ -14,38 +14,38 @@ jobs:
     runs-on: 'ubuntu-latest'
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Log in to registry
-      uses: docker/login-action@v2
-      with:
-        registry: https://registryforinvoicing.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_3b962ff638ca4f2d85daea1509ab1e25 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_f3e535f926be4154966ae6d5e3cb7eac }}
+      - name: Log in to registry
+        uses: docker/login-action@v2
+        with:
+          registry: https://registryforinvoicing.azurecr.io/
+          username: ${{ secrets.AzureAppService_ContainerUsername_3b962ff638ca4f2d85daea1509ab1e25 }}
+          password: ${{ secrets.AzureAppService_ContainerPassword_f3e535f926be4154966ae6d5e3cb7eac }}
 
-    - name: Build and push container image to registry
-      uses: docker/build-push-action@v3
-      with:
-        push: true
-        tags: registryforinvoicing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_3b962ff638ca4f2d85daea1509ab1e25 }}/registryforinvoicing/mydashboardinvoicing:${{ github.sha }}
-        file: ./Dockerfile
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: registryforinvoicing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_3b962ff638ca4f2d85daea1509ab1e25 }}/registryforinvoicing/mydashboardinvoicing:${{ github.sha }}
+          file: ./Dockerfile
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'production'
+      name: 'development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'invoicing-app-dev'
-        slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_570f6d297a29440199e666416b0cf092 }}
-        images: 'registryforinvoicing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_3b962ff638ca4f2d85daea1509ab1e25 }}/registryforinvoicing/mydashboardinvoicing:${{ github.sha }}'
+      - name: Deploy to Azure Web App (Dev)
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'invoicing-app-dev'
+          slot-name: 'production'
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_570f6d297a29440199e666416b0cf092 }}
+          images: 'registryforinvoicing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_3b962ff638ca4f2d85daea1509ab1e25 }}/registryforinvoicing/mydashboardinvoicing:${{ github.sha }}'
