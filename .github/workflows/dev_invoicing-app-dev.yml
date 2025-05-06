@@ -30,7 +30,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: registryforinvoicing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_0cb42eec017e4e228fb599606e0104c5 }}/invoicing-app-dev:${{ github.sha }}
+          tags: registryforinvoicing.azurecr.io/invoicing-app-dev:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
@@ -48,4 +48,4 @@ jobs:
           app-name: 'invoicing-app-dev'
           slot-name: 'production'
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_0ac52d03c84a459b8e07a3226f08c51b }}
-          images: 'registryforinvoicing.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_0cb42eec017e4e228fb599606e0104c5 }}/invoicing-app-dev:${{ github.sha }}'
+          images: 'registryforinvoicing.azurecr.io/invoicing-app-dev:${{ github.sha }}'
