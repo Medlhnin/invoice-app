@@ -51,5 +51,5 @@ jobs:
         with:
           app-name: 'invoicing-app-dev'
           slot-name: 'production'
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_0ac52d03c84a459b8e07a3226f08c51b }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_invoicing_app_dev }}
           package: '*.jar'
