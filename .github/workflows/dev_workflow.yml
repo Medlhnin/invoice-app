@@ -45,6 +45,9 @@ jobs:
         with:
           name: java-app
 
+      - name: List files in target directory
+        run: ls -l ${{ github.workspace }}/target
+
       - name: Deploy to Azure Web App (Dev)
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
