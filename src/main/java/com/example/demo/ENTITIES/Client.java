@@ -29,13 +29,13 @@ public class Client {
     private int codePostal;
     private String phoneNumber;
     private String mail_address;
-    private int ice;
+    private Long ice;
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Invoice> invoices;
 
     public Client(String nameEnterprise, String nameContact, String address, String ville, int codePostal,
-                  String phoneNumber, String mail_address, int ice)
+                  String phoneNumber, String mail_address, Long ice)
     {
         this.publicId = UUID.randomUUID();
         this.address = address;
