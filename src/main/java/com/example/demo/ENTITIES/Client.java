@@ -15,7 +15,8 @@ import java.util.UUID;
 @Table(name = "CLIENT_TABLE")
 public class Client {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "client_seq")
+    @SequenceGenerator(name = "client_seq", sequenceName = "client_table_seq", allocationSize = 1)
     @Column(name = "enterprise_id")
     private Long id;
 
