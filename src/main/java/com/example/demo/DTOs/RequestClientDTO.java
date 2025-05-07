@@ -7,5 +7,5 @@ public record RequestClientDTO(String nameEnterprise,
                                int codePostal,
                                String phoneNumber,
                                String mail_address,
-                               int ice) {
+                               String ice) {
 }
