@@ -25,7 +25,7 @@ public class Invoice {
     @Column(name = "numero_chronologique", unique = true)
     private String numeroChronologique;
     @Column(name = "amountPayed")
-    private double amountPayed;
+    private double amountPayed = 0.00;
     private String destination;
     private LocalDateTime dateFacture ;
     private String projectDescription;
