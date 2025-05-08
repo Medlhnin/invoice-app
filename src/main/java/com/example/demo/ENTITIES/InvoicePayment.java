@@ -24,7 +24,7 @@ public class InvoicePayment {
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
-    @Column(name = "amount", nullable = false, precision = 10, scale = 2)
+    @Column(name = "amount", nullable = false)
     private double amount;
 
     @Column(name = "payment_date", nullable = false)
