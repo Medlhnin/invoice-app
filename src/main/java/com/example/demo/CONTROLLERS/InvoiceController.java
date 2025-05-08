@@ -84,7 +84,7 @@ public class InvoiceController {
             invoicePayment.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));
         }
 
-        invoiceRepository.save(invoice);
+        invoicePaymentRepository.save(invoicePayment);
         return ResponseEntity.noContent().build();
     }
 
