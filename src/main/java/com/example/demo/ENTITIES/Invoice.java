@@ -24,6 +24,7 @@ public class Invoice {
     private Client client;
     @Column(name = "numero_chronologique", unique = true)
     private String numeroChronologique;
+    @Column(name = "amountPayed")
     private double amountPayed;
     private String destination;
     private LocalDateTime dateFacture ;
