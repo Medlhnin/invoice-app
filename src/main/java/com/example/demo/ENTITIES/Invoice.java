@@ -16,7 +16,8 @@ import java.time.LocalDateTime;
 @Table(name = "INVOICE_TABLE")
 public class Invoice {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE , generator = "invoice_seq")
+    @SequenceGenerator(name = "invoice_seq", sequenceName = "invoice_table_seq", allocationSize = 1)
     private Long id;
     @ManyToOne
     @JoinColumn(name = "client_id")
