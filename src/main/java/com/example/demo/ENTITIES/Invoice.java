@@ -24,7 +24,6 @@ public class Invoice {
     private Client client;
     @Column(name = "numero_chronologique", unique = true)
     private String numeroChronologique;
-    private double amountPayed = 0.00;
     private String destination;
     private LocalDateTime dateFacture ;
     private String projectDescription;
@@ -36,11 +35,6 @@ public class Invoice {
     private Mode mode;
     @Enumerated(EnumType.STRING)
     private InvoiceStatus invoiceStatus;
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
-    private Long cheque_number;
-    private Long remise_number;
-    private LocalDateTime datePayment;
     private LocalDateTime expectedDateTime;
     private LocalDateTime dueDate;
     @ManyToOne
@@ -51,8 +45,5 @@ public class Invoice {
         return this.invoiceStatus != InvoiceStatus.Valid;
     }
 
-    public void increaseAmountPaid(double amountPayed) {
-        this.amountPayed += amountPayed;
-    }
 
 }

@@ -4,9 +4,11 @@ import com.example.demo.DTOs.InvoiceRequestDTO;
 import com.example.demo.DTOs.RequestClientDTO;
 import com.example.demo.ENTITIES.Client;
 import com.example.demo.ENTITIES.Invoice;
+import com.example.demo.ENTITIES.InvoicePayment;
 import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.PaymentMethod;
 import com.example.demo.MAPPERS.InvoiceMapper;
+import com.example.demo.REPOSITORIES.InvoicePaymentRepository;
 import com.example.demo.REPOSITORIES.InvoiceRepository;
 import com.example.demo.SERVICES.InvoiceService;
 import jakarta.mail.MessagingException;
@@ -32,6 +34,7 @@ public class InvoiceController {
 
     private final InvoiceService invoiceService;
     private final InvoiceRepository invoiceRepository;
+    private final InvoicePaymentRepository invoicePaymentRepository;
     private final InvoiceMapper invoiceMapper;
     private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
 
@@ -63,17 +66,22 @@ public class InvoiceController {
 
 
     @PutMapping("/{id}/payment")
-    public ResponseEntity<Void> updatePaymentInfo(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
+    public ResponseEntity<Void> updatePaymentInfo(@PathVariable Long id,
+                                                  @RequestBody Map<String, Object> payload) {
+
+        InvoicePayment invoicePayment = new InvoicePayment();
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        invoice.setPaymentMethod(PaymentMethod.valueOf(payload.get("paymentMethod").toString()));
-        invoice.increaseAmountPaid(Double.parseDouble(payload.get("amountPayed").toString()));
-        invoice.setDatePayment(LocalDateTime.parse(payload.get("datePayment").toString()));
+        invoicePayment.setPaymentMethod(PaymentMethod.valueOf(payload.get("paymentMethod").toString()));
+        invoicePayment.increaseAmountPaid(Double.parseDouble(payload.get("amountPayed").toString()));
+        invoicePayment.setPaymentDate(LocalDateTime.parse(payload.get("datePayment").toString()));
+        invoicePayment.setNotes(payload.get("notes").toString());
+        invoicePayment.setInvoice(invoice);
         invoice.setInvoiceStatus(InvoiceStatus.Paid);
-        if (invoice.getPaymentMethod() == PaymentMethod.CHEQUE) {
-            invoice.setCheque_number(Long.parseLong(payload.get("cheque_number").toString()));
-            invoice.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));
+        if (invoicePayment.getPaymentMethod() == PaymentMethod.CHEQUE) {
+            invoicePayment.setCheque_number(Long.parseLong(payload.get("cheque_number").toString()));
+            invoicePayment.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));
         }
 
         invoiceRepository.save(invoice);
