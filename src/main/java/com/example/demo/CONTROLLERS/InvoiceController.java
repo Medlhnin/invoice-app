@@ -74,7 +74,9 @@ public class InvoiceController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         invoicePayment.setPaymentMethod(PaymentMethod.valueOf(payload.get("paymentMethod").toString()));
-        invoicePayment.increaseAmountPaid(Double.parseDouble(payload.get("amountPayed").toString()));
+        double amountPaid = Double.parseDouble(payload.get("amount").toString());
+        invoicePayment.setAmount(amountPaid);
+        invoice.increaseAmountPaid(amountPaid);
         invoicePayment.setPaymentDate(LocalDateTime.parse(payload.get("datePayment").toString()));
         invoicePayment.setNotes(payload.get("notes").toString());
         invoicePayment.setInvoice(invoice);

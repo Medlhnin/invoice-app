@@ -40,8 +40,4 @@ public class InvoicePayment {
     @Column(name = "notes", length = 500)
     private String notes;
 
-    public void increaseAmountPaid(double amountPayed) {
-        this.amount += amountPayed;
-    }
-
 }

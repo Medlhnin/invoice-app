@@ -40,9 +40,15 @@ public class Invoice {
     @ManyToOne
     @JoinColumn(name = "scheduled_invoice_id")
     private ScheduledInvoice scheduledSource;
+    private double amountPaid;
+
 
     public boolean isEmailSent(){
         return this.invoiceStatus != InvoiceStatus.Valid;
+    }
+
+    public void increaseAmountPaid(double amount){
+        this.amountPaid += amount;
     }
 
 
