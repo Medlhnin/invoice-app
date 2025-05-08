@@ -24,7 +24,6 @@ public class Invoice {
     private Client client;
     @Column(name = "numero_chronologique", unique = true)
     private String numeroChronologique;
-    @Column(name = "amountPayed")
     private double amountPayed = 0.00;
     private String destination;
     private LocalDateTime dateFacture ;
@@ -52,8 +51,8 @@ public class Invoice {
         return this.invoiceStatus != InvoiceStatus.Valid;
     }
 
-    public void increaseAmountPaid(double amount) {
-        this.amountPayed += this.amount;
+    public void increaseAmountPaid(double amountPayed) {
+        this.amountPayed += amountPayed;
     }
 
 }
