@@ -68,11 +68,12 @@ public class InvoiceController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         invoice.setPaymentMethod(PaymentMethod.valueOf(payload.get("paymentMethod").toString()));
+        invoice.increaseAmountPaid(Double.parseDouble(payload.get("amountPayed").toString()));
+        invoice.setDatePayment(LocalDateTime.parse(payload.get("datePayment").toString()));
         invoice.setInvoiceStatus(InvoiceStatus.Paid);
         if (invoice.getPaymentMethod() == PaymentMethod.CHEQUE) {
             invoice.setCheque_number(Long.parseLong(payload.get("cheque_number").toString()));
             invoice.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));
-            invoice.setDatePayment(LocalDateTime.parse(payload.get("datePayment").toString()));
         }
 
         invoiceRepository.save(invoice);
@@ -107,7 +108,6 @@ public class InvoiceController {
         Invoice invoice = invoiceRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         invoice.setInvoiceStatus(InvoiceStatus.Draft);
-        /* invoiceService.cancelScheduledEmail(id); */
         invoiceRepository.save(invoice);
 
         return ResponseEntity.noContent().build();
@@ -140,6 +140,7 @@ public class InvoiceController {
         return ResponseEntity.noContent().build();
 
     }
+
 
 
 }

@@ -24,6 +24,7 @@ public class Invoice {
     private Client client;
     @Column(name = "numero_chronologique", unique = true)
     private String numeroChronologique;
+    private double amountPayed;
     private String destination;
     private LocalDateTime dateFacture ;
     private String projectDescription;
@@ -48,6 +49,10 @@ public class Invoice {
 
     public boolean isEmailSent(){
         return this.invoiceStatus != InvoiceStatus.Valid;
+    }
+
+    public void increaseAmountPaid(double amount) {
+        this.amountPayed += this.amount;
     }
 
 }
