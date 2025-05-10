@@ -30,8 +30,7 @@ public class InvoicePaymentController {
                                                   @RequestBody Map<String, Object> payload) {
 
         InvoicePayment invoicePayment = new InvoicePayment();
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Invoice invoice = invoiceRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         invoicePayment.setPaymentMethod(PaymentMethod.valueOf(payload.get("paymentMethod").toString()));
         double amountPaid = Double.parseDouble(payload.get("amount").toString());
@@ -66,7 +65,12 @@ public class InvoicePaymentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id){
         InvoicePayment invoicePayment = invoicePaymentRepository.findById(id).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "REMOVED Client NOT FOUND "));
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "REMOVED InvoicePayment NOT FOUND "));
+
+        Invoice invoice = invoiceRepository.findById(invoicePayment.getInvoice().getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        invoice.decreaseAmountPaid(invoicePayment.getAmount());
         invoicePaymentRepository.delete(invoicePayment);
         return ResponseEntity.noContent().build();
     }

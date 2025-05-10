@@ -51,5 +51,9 @@ public class Invoice {
         this.amountPaid += amount;
     }
 
+    public void decreaseAmountPaid(double amount){
+        this.amountPaid -= amount;
+    }
+
 
 }
