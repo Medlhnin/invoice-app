@@ -39,7 +39,7 @@ public class InvoicePaymentController {
         invoicePayment.setPaymentDate(LocalDateTime.parse(payload.get("datePayment").toString()));
         invoicePayment.setNotes(payload.get("notes").toString());
         invoicePayment.setInvoice(invoice);
-        invoice.setInvoiceStatus(InvoiceStatus.Paid);
+        invoice.invoiceStaus();
         if (invoicePayment.getPaymentMethod() == PaymentMethod.CHEQUE) {
             invoicePayment.setCheque_number(Long.parseLong(payload.get("cheque_number").toString()));
             invoicePayment.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));

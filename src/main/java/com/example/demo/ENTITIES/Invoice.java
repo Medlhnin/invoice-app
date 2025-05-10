@@ -55,5 +55,15 @@ public class Invoice {
         this.amountPaid -= amount;
     }
 
+    public void invoiceStaus(){
+        if(this.amountPaid >= this.amount) {
+            this.invoiceStatus = InvoiceStatus.Paid;
+        }
+        else {
+            this.invoiceStatus = InvoiceStatus.partiallyPaid;
+        }
+    }
+
+
 
 }
