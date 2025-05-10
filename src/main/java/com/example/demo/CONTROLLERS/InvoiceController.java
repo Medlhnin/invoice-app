@@ -34,7 +34,6 @@ public class InvoiceController {
 
     private final InvoiceService invoiceService;
     private final InvoiceRepository invoiceRepository;
-    private final InvoicePaymentRepository invoicePaymentRepository;
     private final InvoiceMapper invoiceMapper;
     private static final Logger logger = LoggerFactory.getLogger(InvoiceController.class);
 
@@ -64,31 +63,6 @@ public class InvoiceController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
-    @PutMapping("/{id}/payment")
-    public ResponseEntity<Void> updatePaymentInfo(@PathVariable Long id,
-                                                  @RequestBody Map<String, Object> payload) {
-
-        InvoicePayment invoicePayment = new InvoicePayment();
-        Invoice invoice = invoiceRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        invoicePayment.setPaymentMethod(PaymentMethod.valueOf(payload.get("paymentMethod").toString()));
-        double amountPaid = Double.parseDouble(payload.get("amount").toString());
-        invoicePayment.setAmount(amountPaid);
-        invoice.increaseAmountPaid(amountPaid);
-        invoicePayment.setPaymentDate(LocalDateTime.parse(payload.get("datePayment").toString()));
-        invoicePayment.setNotes(payload.get("notes").toString());
-        invoicePayment.setInvoice(invoice);
-        invoice.setInvoiceStatus(InvoiceStatus.Paid);
-        if (invoicePayment.getPaymentMethod() == PaymentMethod.CHEQUE) {
-            invoicePayment.setCheque_number(Long.parseLong(payload.get("cheque_number").toString()));
-            invoicePayment.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));
-        }
-
-        invoicePaymentRepository.save(invoicePayment);
-        return ResponseEntity.noContent().build();
-    }
 
     @GetMapping("/confirm")
     public ResponseEntity<String> confirmReception(@RequestParam Long id) {
