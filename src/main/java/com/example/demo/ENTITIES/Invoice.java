@@ -2,7 +2,6 @@ package com.example.demo.ENTITIES;
 
 import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.Mode;
-import com.example.demo.ENUMS.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,7 +41,6 @@ public class Invoice {
     private ScheduledInvoice scheduledSource;
     private double amountPaid;
 
-
     public boolean isEmailSent(){
         return this.invoiceStatus != InvoiceStatus.Valid;
     }
@@ -55,8 +53,9 @@ public class Invoice {
         this.amountPaid -= amount;
     }
 
-    public void invoiceStaus(){
-        if(this.amountPaid >= this.amount) {
+    public void invoiceStatus(){
+        double total = this.amount * (1 + this.tva/100) + this.fees_disbursements - this.deposit;
+        if(this.amountPaid >= total ) {
             this.invoiceStatus = InvoiceStatus.Paid;
         }
         else {

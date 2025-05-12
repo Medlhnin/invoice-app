@@ -3,7 +3,6 @@ package com.example.demo.CONTROLLERS;
 import com.example.demo.DTOs.InvoicePaymentRequestDTO;
 import com.example.demo.ENTITIES.Invoice;
 import com.example.demo.ENTITIES.InvoicePayment;
-import com.example.demo.ENUMS.InvoiceStatus;
 import com.example.demo.ENUMS.PaymentMethod;
 import com.example.demo.REPOSITORIES.InvoicePaymentRepository;
 import com.example.demo.REPOSITORIES.InvoiceRepository;
@@ -39,7 +38,7 @@ public class InvoicePaymentController {
         invoicePayment.setPaymentDate(LocalDateTime.parse(payload.get("datePayment").toString()));
         invoicePayment.setNotes(payload.get("notes").toString());
         invoicePayment.setInvoice(invoice);
-        invoice.invoiceStaus();
+        invoice.invoiceStatus();
         if (invoicePayment.getPaymentMethod() == PaymentMethod.CHEQUE) {
             invoicePayment.setCheque_number(Long.parseLong(payload.get("cheque_number").toString()));
             invoicePayment.setRemise_number(Long.parseLong(payload.get("remise_number").toString()));
@@ -71,6 +70,7 @@ public class InvoicePaymentController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         invoice.decreaseAmountPaid(invoicePayment.getAmount());
+
         invoicePaymentRepository.delete(invoicePayment);
         return ResponseEntity.noContent().build();
     }
