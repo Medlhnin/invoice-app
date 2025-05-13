@@ -63,7 +63,6 @@ public class InvoiceController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
     @GetMapping("/confirm")
     public ResponseEntity<String> confirmReception(@RequestParam Long id) {
         Invoice invoice = invoiceRepository.findById(id)
@@ -124,7 +123,5 @@ public class InvoiceController {
         return ResponseEntity.noContent().build();
 
     }
-
-
 
 }

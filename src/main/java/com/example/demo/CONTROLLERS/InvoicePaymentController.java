@@ -4,6 +4,7 @@ import com.example.demo.DTOs.InvoicePaymentRequestDTO;
 import com.example.demo.ENTITIES.Invoice;
 import com.example.demo.ENTITIES.InvoicePayment;
 import com.example.demo.ENUMS.PaymentMethod;
+import com.example.demo.MAPPERS.InvoicePaymentMapper;
 import com.example.demo.REPOSITORIES.InvoicePaymentRepository;
 import com.example.demo.REPOSITORIES.InvoiceRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class InvoicePaymentController {
 
     private final InvoicePaymentRepository invoicePaymentRepository;
     private final InvoiceRepository invoiceRepository;
+    private final InvoicePaymentMapper invoicePaymentMapper;
 
     @PostMapping("/{id}")
     public ResponseEntity<Void> updatePaymentInfo(@PathVariable Long id,
@@ -57,6 +59,10 @@ public class InvoicePaymentController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable Long id,
                                        @RequestBody InvoicePaymentRequestDTO updatedRequest) {
+        InvoicePayment invoicePayment = invoicePaymentRepository.findById(id).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "REMOVED InvoicePayment NOT FOUND "));
+
+        invoicePaymentMapper.requestToInvoicePayment(updatedRequest, invoicePayment);
 
         return ResponseEntity.noContent().build();
     }
